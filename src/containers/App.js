@@ -1,57 +1,51 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import CardList from "../components/CardList";
 import SearchBox from "../components/SearchBox";
 import Scroll from "../components/Scroll";
 import ErrorBoundary from "../components/ErrorBoundary";
 // import { robots } from "./robots";
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      robots: [],
-      searchField: "",
-    };
-  }
+function App() {
+  const [robots, setRobots] = useState([]);
+  const [searchField, setSearchField] = useState("");
 
-  componentDidMount() {
+  // componentDidMount replacement using hooks
+  // NOTE: the [] second arg is necessary to avoid rerunning useEffect on each re-render
+  useEffect(() => {
     fetch("https://jsonplaceholder.typicode.com/users")
       .then((response) => {
         return response.json();
       })
       .then((users) => {
-        this.setState({ robots: users });
+        setRobots(users);
       });
-    // this.setState({ robots: robots });
-  }
+      // console.log("Initial value", robots, searchField);
+  }, []);
 
-  onSearchChange = (event) => {
-    this.setState({ searchField: event.target.value });
+  const onSearchChange = (event) => {
+    setSearchField(event.target.value);
   };
 
-  render() {
-    const { robots, searchField } = this.state;
-    const filteredRobots = robots.filter((robot) => {
-      return robot.name.toLowerCase().includes(searchField.toLowerCase());
-    });
+  const filteredRobots = robots.filter((robot) => {
+    return robot.name.toLowerCase().includes(searchField.toLowerCase());
+  });
 
-    // Loading
-    if (!robots.length) {
-      return <h1>Loading...</h1>;
-    } else {
-      // console.log(filteredRobots);
-      return (
-        <div className="tc">
-          <h1>Robo Friends</h1>
-          <SearchBox searchChange={this.onSearchChange} />
-          <Scroll>
-            <ErrorBoundary>
-              <CardList robots={filteredRobots} />
-            </ErrorBoundary>
-          </Scroll>
-        </div>
-      );
-    }
+  // Loading
+  if (!robots.length) {
+    return <h1>Loading...</h1>;
+  } else {
+    // console.log(filteredRobots);
+    return (
+      <div className="tc">
+        <h1>Robo Friends</h1>
+        <SearchBox searchChange={onSearchChange} />
+        <Scroll>
+          <ErrorBoundary>
+            <CardList robots={filteredRobots} />
+          </ErrorBoundary>
+        </Scroll>
+      </div>
+    );
   }
 }
 
